@@ -36,8 +36,10 @@ class BookingSerializer(serializers.ModelSerializer):
         print(f'Raw Booking data: {data}')
         internal_data = super(BookingSerializer, self).to_internal_value(data)
         print('Internal Booking Data')
+        return internal_data
 
     def create(self, validated_data):
+        self.hotel = Hotel.objects.get(id=1)
         print(f"Validated Data: {validated_data}")
         booking_start = validated_data.pop("booking_start")
         booking_end = validated_data.pop("booking_end")

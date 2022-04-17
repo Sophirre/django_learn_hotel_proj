@@ -49,8 +49,8 @@ def create_room(hotel, hotel_rooms_amount):
         )
         rooms.append(room)
     Room.objects.bulk_create(rooms)
-# 1. Write create_room logic in fill_db.py
-# 2. Create url + view to show all available hotels in DB
+
+
 def main():
      create_cities()
      create_hotel()

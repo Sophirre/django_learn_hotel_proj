@@ -48,7 +48,7 @@ class Booking(models.Model):
     persons = models.IntegerField()
     booking_start = models.DateField()
     booking_end = models.DateField()
-    price = models.FloatField()
+    price = models.FloatField(default=0)
     room = models.ForeignKey(
         "Room",
         on_delete=models.CASCADE,
