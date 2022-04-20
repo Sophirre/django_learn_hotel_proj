@@ -1,11 +1,20 @@
 from rest_framework import serializers
-
+from django.core.exceptions import ObjectDoesNotExist
 from hotel_app.models import (
     Hotel,
-    Booking
+    Booking,
+    City,
+    Room
 )
 
 from hotel_app.utils.common import find_room
+
+
+class RoomSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Room
+        fields = ('room_number', 'beds', 'hotel')
 
 
 class HotelSerializer(serializers.ModelSerializer):
@@ -20,6 +29,7 @@ class HotelSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     city = serializers.CharField(read_only=True)
     hotel = serializers.CharField(read_only=True)
+    place = serializers.CharField(source="room.hotel")
 
     class Meta:
         model = Booking
@@ -30,16 +40,30 @@ class BookingSerializer(serializers.ModelSerializer):
             'city',
             'hotel',
             'persons',
+            'place'
         )
+
+    @staticmethod
+    def get_hotel(city, hotel):
+        try:
+            city = City.objects.get(title=city)
+            hotel = city.hotels.get(title=hotel)
+        except ObjectDoesNotExist as e:
+            raise serializers.ValidationError(
+                {'error': f'{city}:{hotel} - {e}'}
+            )
+        print("Hotel Detected")
+        return hotel
 
     def to_internal_value(self, data):
         print(f'Raw Booking data: {data}')
         internal_data = super(BookingSerializer, self).to_internal_value(data)
+        self.city = data.get("city")
+        self.hotel = self.get_hotel(self.city, data.get('hotel'))
         print('Internal Booking Data')
         return internal_data
 
     def create(self, validated_data):
-        self.hotel = Hotel.objects.get(id=1)
         print(f"Validated Data: {validated_data}")
         booking_start = validated_data.pop("booking_start")
         booking_end = validated_data.pop("booking_end")
@@ -50,7 +74,7 @@ class BookingSerializer(serializers.ModelSerializer):
             persons=persons,
             booking_start=booking_start,
             booking_end=booking_end,
-            room=room
+            room=room,
         )
         print(f'Booking Instance: {booking}')
         return booking

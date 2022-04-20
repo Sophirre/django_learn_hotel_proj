@@ -27,7 +27,7 @@ class Hotel(models.Model):
         return rooms_by_beds
 
     def __str__(self):
-        return f"{self.city}: {self.title}"
+        return f"Hotel: {self.title} | City: {self.city} "
 
 
 class Room(models.Model):

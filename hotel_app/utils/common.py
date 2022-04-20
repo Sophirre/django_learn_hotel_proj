@@ -14,5 +14,6 @@ def find_room(persons, booking_start, booking_end, hotel):
 
     suitable_rooms = set(hotel.rooms.filter(beds=persons))
     available_rooms = suitable_rooms.difference(booked_rooms)
-    print(f'Available rooms: {available_rooms}')
     return available_rooms.pop()
+
+# Todo Check that <find_room> filter_by_date works fine
