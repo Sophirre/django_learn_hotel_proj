@@ -6,7 +6,6 @@ from hotel_app.models import (
     City,
     Hotel,
     Room,
-    Booking
 )
 from hotel_app.utils.constants import (
     CITIES,
@@ -25,32 +24,42 @@ def create_cities():
 
 def create_hotel():
     cities = City.objects.all()
-    hotels = [Hotel(title=f"Hotel_{letter}") for letter in HOTELS_LETTERS]
-    for hotel in hotels:
-        hotel.city = choice(cities)
-        try:
-            # TODO: cities iteration and bulk_create()
-            hotel.save()
-            hotel_rooms_amount = randint(100, 1000)
-            create_room(hotel, hotel_rooms_amount)
-        except IntegrityError as e:
-            print(f"{hotel} already exist in the {hotel.city}")
+    hotels = []
+    for city in cities:
+        letters = HOTELS_LETTERS.copy()
+        print(f'Create hotels for city: {city}')
+        for _ in range(4, 11):
+            letter = choice(HOTELS_LETTERS)
+            try:
+                letters.pop(letters.index(letter))
+
+            except ValueError:
+                continue
+            title = f"Hotel_{letter}"
+            print(title)
+            city = city
+            hotel_obj = Hotel(title=title, city=city)
+            hotels.append(hotel_obj)
+    Hotel.objects.bulk_create(hotels)
 
 
-def create_room(hotel, hotel_rooms_amount):
-    print(f"Create {hotel_rooms_amount} rooms for {hotel} hotel")
-    # TODO: Finish function
+def create_room():
+    hotels = Hotel.objects.all()
     rooms = []
-    for num in range(1, hotel_rooms_amount):
-        room = Room(
-            hotel=hotel,
-            room_number=num,
-            beds=randint(1,4)
-        )
-        rooms.append(room)
+    for hotel in hotels:
+        hotel_rooms_amount = randint(20, 500)
+        print(f"Create {hotel_rooms_amount} rooms for {hotel}")
+        for num in range(1, hotel_rooms_amount):
+            room = Room(
+                hotel=hotel,
+                room_number=num,
+                beds=randint(1, 4)
+            )
+            rooms.append(room)
     Room.objects.bulk_create(rooms)
 
 
 def main():
-     create_cities()
-     create_hotel()
+    create_cities()
+    create_hotel()
+    create_room()
