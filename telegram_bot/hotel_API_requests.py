@@ -5,13 +5,13 @@ class ApiData:
     URL = "http://127.0.0.1:8000/hotels/api"
 
     @staticmethod
-    def parser(req):
+    def hotel_titles_parser(req):
         return [el.get('title') for el in req]
 
     def get_hotels(self, city):
         req = requests.get(f"{self.URL}/hotels", params={"city": city})
         print(req.json())
-        return self.parser(req.json())
+        return self.hotel_titles_parser(req.json())
 
     def get_bookings(self, name=None):
         if name:
