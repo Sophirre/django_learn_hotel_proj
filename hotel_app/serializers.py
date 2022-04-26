@@ -29,7 +29,7 @@ class HotelSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     city = serializers.CharField(read_only=True)
     hotel = serializers.CharField(read_only=True)
-    place = serializers.CharField(source="room.hotel")
+    place = serializers.CharField(source="room.hotel", read_only=True)
 
     class Meta:
         model = Booking
@@ -56,14 +56,13 @@ class BookingSerializer(serializers.ModelSerializer):
         return hotel
 
     def to_internal_value(self, data):
-        print(f'Raw Booking data: {data}')
         internal_data = super(BookingSerializer, self).to_internal_value(data)
         self.city = data.get("city")
         self.hotel = self.get_hotel(self.city, data.get('hotel'))
-        print('Internal Booking Data')
         return internal_data
 
     def create(self, validated_data):
+        print("OK")
         print(f"Validated Data: {validated_data}")
         booking_start = validated_data.pop("booking_start")
         booking_end = validated_data.pop("booking_end")

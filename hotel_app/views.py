@@ -40,9 +40,8 @@ def api_booking(req):
         return Response(serializer.data)
     elif req.method == "POST":
         serializer = BookingSerializer(data=req.data, many=True)
-        print(f'Before: {serializer}')
         if serializer.is_valid():
-            print(f'After: {serializer}')
+            print("OK")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
