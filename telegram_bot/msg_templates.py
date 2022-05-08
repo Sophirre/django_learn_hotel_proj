@@ -21,3 +21,5 @@ BOOKINGS_INFO_TEMPLATE = "Name: {} \n" \
                    "Arriving_date: {} \n" \
                    "Leaving_date: {} \n" \
                    "Persons: {}"
+
+INVALID_DATA_FORMAT = "ERROR: Invalid Data Format (YYYY-MM-DD)"

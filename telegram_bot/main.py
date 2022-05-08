@@ -2,6 +2,7 @@ from telebot import TeleBot, types
 from json import dumps
 
 from hotel_API_requests import ApiData
+from utils.validators import date_validator
 
 from msg_templates import (
     START_MESSAGE_TEXT,
@@ -10,6 +11,7 @@ from msg_templates import (
     CITY_NOT_FOUND,
     BOOKINGS_NOT_FOUND,
     BOOKINGS_INFO_TEMPLATE,
+    INVALID_DATA_FORMAT,
 )
 from const import TOKEN, REQUEST_INDEX
 
@@ -86,6 +88,7 @@ func_mapper = {
     },
     "get_booking_start": {
         "next_func": "get_booking_end",
+        "is_date": True,
         "prev_func": "get_name",
         "dict_key": "booking_start",
         "ok_msg_text": "Type booking end date (YYYY-MM-DD):",
@@ -94,6 +97,7 @@ func_mapper = {
     "get_booking_end": {
         "next_func": "get_persons",
         "prev_func": "get_booking_start",
+        "is_date": True,
         "dict_key": "booking_end",
         "ok_msg_text": "How many residents are there?",
         "err_msg_text": ""
@@ -129,14 +133,34 @@ def book_hotel_collector(message, current_func):
     ok_msg = func_mapper[current_func]["ok_msg_text"]
     prev_func = func_mapper[current_func]['prev_func']
 
+    is_date = func_mapper[current_func].get('is_date')
+
     req[REQUEST_INDEX].update({key: message.text})
     if message.text == "/edit":
-        print("Editing")
         bot.register_next_step_handler(
             message,
             lambda msg: book_hotel_collector(msg, prev_func)
         )
         return None
+
+    if is_date:
+        validated_date = date_validator(message.text)
+        if validated_date:
+            print("Successful validation")
+            req[REQUEST_INDEX].update({key: validated_date.strftime("%Y-%m-%d")})
+        else:
+            print("Unsuccessful validation")
+            prev_func_ok_msg = func_mapper[prev_func]["ok_msg_text"]
+            bot.send_message(message.chat.id, INVALID_DATA_FORMAT)
+            bot.send_message(message.chat.id, prev_func_ok_msg)
+            bot.register_next_step_handler(
+                message,
+                lambda msg: book_hotel_collector(msg, current_func)
+            )
+            return None
+    else:
+        req[REQUEST_INDEX].update({key: message.text})
+
     if next_func:
         bot.send_message(message.chat.id, ok_msg)
         bot.register_next_step_handler(
